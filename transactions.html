@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<div class="page-intro"><div><span class="tag">LEDGER</span><h2>Income & spending log</h2><p>Capture every rupee and turn raw transactions into useful patterns.</p></div><button class="btn primary" onclick="openModal()">+ Add transaction</button></div>
+<div class="panel"><div class="table-tools"><input id="search" placeholder="Search transactions…"><select id="filter"><option value="">All types</option><option value="income">Income</option><option value="expense">Expense</option></select></div>
+<div class="table-scroll"><table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th>Amount</th><th></th></tr></thead><tbody id="txBody"></tbody></table></div></div>
+<div id="modal" class="modal hidden"><div class="modal-box"><button class="close" onclick="closeModal()">×</button><h3>Add transaction</h3><form onsubmit="saveTx(event)">
+<label>Title<input id="tTitle" required placeholder="e.g. Internship stipend"></label>
+<label>Category<select id="tCat"><option>Salary</option><option>Freelance</option><option>Housing</option><option>Food</option><option>Transport</option><option>Education</option><option>Entertainment</option><option>Shopping</option><option>Savings</option><option>Other</option></select></label>
+<div class="two"><label>Amount (₹)<input id="tAmount" type="number" min="1" step=".01" required></label><label>Type<select id="tType"><option value="expense">Expense</option><option value="income">Income</option></select></label></div>
+<label>Date<input id="tDate" type="date" required></label><label>Note<textarea id="tNote" placeholder="Optional note"></textarea></label><button class="btn primary full">Save transaction</button></form></div></div>
+{% endblock %}
+{% block scripts %}<script>
+let allTx=[];
+async function loadTx(){allTx=await api('/api/transactions'); renderTx();}
+function renderTx(){let q=(document.getElementById('search').value||'').toLowerCase(), f=document.getElementById('filter').value;let rows=allTx.filter(x=>(!f||x.type===f)&&JSON.stringify(x).toLowerCase().includes(q));document.getElementById('txBody').innerHTML=rows.map(x=>`<tr><td>${x.date}</td><td><b>${x.title}</b><small>${x.note||''}</small></td><td>${x.category}</td><td><span class="type ${x.type}">${x.type}</span></td><td class="${x.type}">${x.type==='income'?'+':'-'}${money(x.amount)}</td><td><button class="icon-btn" onclick="delTx(${x.id})">⌫</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">No transactions found.</td></tr>'}
+document.getElementById('search').oninput=renderTx;document.getElementById('filter').onchange=renderTx;
+function openModal(){document.getElementById('modal').classList.remove('hidden');document.getElementById('tDate').value=new Date().toISOString().slice(0,10)}
+function closeModal(){document.getElementById('modal').classList.add('hidden')}
+async function saveTx(e){e.preventDefault();await api('/api/transactions','POST',{title:tTitle.value,category:tCat.value,amount:tAmount.value,type:tType.value,date:tDate.value,note:tNote.value});closeModal();e.target.reset();loadTx();}
+async function delTx(id){if(confirm('Delete this transaction?')){await fetch('/api/transactions/'+id,{method:'DELETE'});loadTx();}}
+loadTx();
+</script>{% endblock %}

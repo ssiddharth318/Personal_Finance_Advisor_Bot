@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FinPilot — Personal Finance Advisor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><div class="brandmark">FP</div><div><b>FinPilot</b><span>AI FINANCE</span></div></div>
+  <nav>
+    <a class="{{ 'active' if page=='dashboard' else '' }}" href="/">⌂ <span>Dashboard</span></a>
+    <a class="{{ 'active' if page=='transactions' else '' }}" href="/transactions">▣ <span>Transactions</span></a>
+    <a class="{{ 'active' if page=='budgets' else '' }}" href="/budgets">◫ <span>Budgets</span></a>
+    <a class="{{ 'active' if page=='goals' else '' }}" href="/goals">◎ <span>Saving Goals</span></a>
+    <a class="{{ 'active' if page=='assistant' else '' }}" href="/assistant">✦ <span>AI Assistant</span></a>
+  </nav>
+  <div class="side-bottom">
+    <div class="secure">● <span>Local data mode</span></div>
+    <button class="ghost" onclick="resetDemo()">↻ Reset demo data</button>
+  </div>
+</aside>
+<main class="main">
+<header class="topbar">
+  <div>
+    <div class="eyebrow">PERSONAL FINANCE ADVISOR BOT</div>
+    <h1>{% block title %}Financial command center{% endblock %}</h1>
+  </div>
+  <div class="top-actions"><span class="pill">✦ AI Ready</span><a class="avatar" href="/assistant">ST</a></div>
+</header>
+{% block content %}{% endblock %}
+<footer>FinPilot • Educational planning assistant • Your data stays in the local SQLite database</footer>
+</main>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

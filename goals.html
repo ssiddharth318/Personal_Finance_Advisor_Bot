@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Savings goals{% endblock %}
+{% block content %}
+<div class="page-intro"><div><span class="tag">GOAL TRACKER</span><h2>Turn plans into milestones</h2><p>Create targets for an emergency fund, laptop, trip, tuition or anything else.</p></div></div>
+<div class="panel form-panel"><h3>Create a savings goal</h3><form class="inline-form" onsubmit="saveGoal(event)"><input id="gName" placeholder="Goal name" required><input id="gTarget" type="number" min="1" placeholder="Target ₹" required><input id="gSaved" type="number" min="0" placeholder="Already saved ₹"><input id="gDate" type="date"><button class="btn primary">Create goal</button></form></div>
+<div class="grid-2" id="goalCards"></div>
+{% endblock %}
+{% block scripts %}<script>
+async function loadGoals(){let d=await api('/api/summary');document.getElementById('goalCards').innerHTML=d.goals.map(g=>{let p=Math.min(100,g.saved/g.target*100);return `<div class="panel goal-card"><div class="goal-icon">◎</div><div class="goal-title"><div><h3>${g.name}</h3><p>${g.deadline?'Deadline: '+g.deadline:'No deadline set'}</p></div><strong>${p.toFixed(0)}%</strong></div><div class="progress big"><i style="width:${p}%"></i></div><div class="goal-foot"><span>${money(g.saved)} saved</span><span>${money(Math.max(0,g.target-g.saved))} left</span></div></div>`}).join('')||'<div class="panel"><p class="muted">Create your first savings goal above.</p></div>'}
+async function saveGoal(e){e.preventDefault();await api('/api/goals','POST',{name:gName.value,target:gTarget.value,saved:gSaved.value||0,deadline:gDate.value});e.target.reset();loadGoals()}
+loadGoals();
+</script>{% endblock %}

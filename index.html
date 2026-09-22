@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Financial command center{% endblock %}
+{% block content %}
+<section class="hero">
+  <div><span class="tag">SMART MONEY WORKSPACE</span><h2>Know where your money goes.<br><em>Plan where it should go.</em></h2>
+  <p>Track income and expenses, build category budgets, follow savings goals and ask an AI advisor for practical insights.</p>
+  <div class="hero-buttons"><a class="btn primary" href="/assistant">Ask AI Advisor ✦</a><a class="btn" href="/transactions">Add transaction +</a></div></div>
+  <div class="hero-art"><div class="orb"></div><div class="mini-card"><small>THIS MONTH</small><strong id="heroBalance">₹0</strong><span>available balance</span></div></div>
+</section>
+<div class="stats" id="stats"></div>
+<section class="grid-2">
+ <div class="panel"><div class="panel-head"><div><h3>Cash flow</h3><p>Income vs expenses by month</p></div><span class="dot-label">● Live</span></div><canvas id="cashflow" height="150"></canvas></div>
+ <div class="panel"><div class="panel-head"><div><h3>Spending mix</h3><p>Where your expenses are going</p></div></div><div class="donut-wrap"><canvas id="spending" height="210"></canvas><div id="donutLegend"></div></div></div>
+</section>
+<section class="grid-2">
+ <div class="panel"><div class="panel-head"><div><h3>Budget health</h3><p>Stay ahead of category overspending</p></div><a href="/budgets">Manage →</a></div><div id="budgetList"></div></div>
+ <div class="panel ai-panel"><div class="ai-glow">✦</div><div><span class="tag purple">AI INSIGHT</span><h3>Personalized money check</h3><p id="advice">Analyzing your dashboard…</p><a href="/assistant" class="text-link">Open advisor →</a></div></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadDashboard(){
+ const d=await api('/api/summary');
+ document.getElementById('heroBalance').textContent=money(d.balance);
+ const stats=document.getElementById('stats');
+ stats.innerHTML=stat('Income',d.income,'↑')+stat('Expenses',d.expense,'↓')+stat('Balance',d.balance,'◈')+stat('Savings rate',d.savings_rate+'%','✦');
+ const labels=d.monthly.map(x=>x.month), inc=d.monthly.map(x=>x.income), exp=d.monthly.map(x=>x.expense);
+ new Chart(document.getElementById('cashflow'),{type:'line',data:{labels,datasets:[{label:'Income',data:inc,tension:.35,borderWidth:3},{label:'Expenses',data:exp,tension:.35,borderWidth:3}]},options:{plugins:{legend:{labels:{color:'#667085'}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#edf0f4'}}}}});
+ const cats=d.categories; new Chart(document.getElementById('spending'),{type:'doughnut',data:{labels:cats.map(x=>x.category),datasets:[{data:cats.map(x=>x.amount),borderWidth:0}]},options:{cutout:'72%',plugins:{legend:{display:false}}}});
+ document.getElementById('donutLegend').innerHTML=cats.slice(0,5).map(x=>`<div class="legend-row"><span class="legend-dot"></span><span>${x.category}</span><b>${money(x.amount)}</b></div>`).join('');
+ document.getElementById('budgetList').innerHTML=d.budgets.slice(0,6).map(b=>{let p=Math.min(100,b.spent/b.limit_amount*100);return `<div class="budget-row"><div><span>${b.category}</span><b>${money(b.spent)} / ${money(b.limit_amount)}</b></div><div class="progress"><i style="width:${p}%"></i></div></div>`}).join('')||'<p class="muted">No budgets yet.</p>';
+ const tips=await api('/api/assistant','POST',{message:'Give me a quick dashboard check.'}); document.getElementById('advice').innerHTML=tips.answer.replace(/\n/g,'<br>');
+}
+function stat(label,value,icon){return `<div class="stat"><span>${icon}</span><small>${label}</small><strong>${typeof value==='number'?money(value):value}</strong></div>`}
+loadDashboard();
+</script>
+{% endblock %}

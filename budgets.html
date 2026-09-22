@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Budget planner{% endblock %}
+{% block content %}
+<div class="page-intro"><div><span class="tag">BUDGET LAB</span><h2>Build a spending boundary</h2><p>Set a monthly limit for each category and let the dashboard flag pressure points.</p></div></div>
+<div class="panel form-panel"><h3>Set or update a category budget</h3><form class="inline-form" onsubmit="saveBudget(event)"><select id="bCat"><option>Housing</option><option>Food</option><option>Transport</option><option>Education</option><option>Entertainment</option><option>Shopping</option><option>Other</option></select><input id="bLimit" type="number" min="1" placeholder="Monthly limit ₹" required><button class="btn primary">Save budget</button></form></div>
+<div class="grid-2" id="budgetCards"></div>
+{% endblock %}
+{% block scripts %}<script>
+async function loadBudgets(){let d=await api('/api/summary');document.getElementById('budgetCards').innerHTML=d.budgets.map(b=>{let p=b.spent/b.limit_amount*100,over=p>100;return `<div class="panel budget-card"><div class="budget-title"><h3>${b.category}</h3><span class="${over?'danger':'safe'}">${over?'Over limit':'On track'}</span></div><div class="big-number">${money(b.spent)} <small>/ ${money(b.limit_amount)}</small></div><div class="progress big"><i style="width:${Math.min(100,p)}%"></i></div><p>${over?'Reduce spending by '+money(b.spent-b.limit_amount)+' to return within the limit.':money(b.limit_amount-b.spent)+' remaining this month.'}</p></div>`}).join('')||'<div class="panel"><p class="muted">Create your first budget above.</p></div>'}
+async function saveBudget(e){e.preventDefault();await api('/api/budgets','POST',{category:bCat.value,limit:bLimit.value});e.target.reset();loadBudgets()}
+loadBudgets();
+</script>{% endblock %}

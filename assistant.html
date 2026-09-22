@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}AI finance assistant{% endblock %}
+{% block content %}
+<section class="assistant-shell">
+<div class="assistant-head"><div class="ai-logo">✦</div><div><span class="tag purple">GEMINI AI</span><h2>Your personal money copilot</h2><p>Ask about budgets, spending patterns, saving strategies or your dashboard.</p></div></div>
+<div class="suggestions"><button onclick="ask('Where am I overspending?')">Where am I overspending?</button><button onclick="ask('How much should I try to save each month?')">How much should I save?</button><button onclick="ask('Give me a 30-day spending plan')">Build a 30-day plan</button></div>
+<div class="chat" id="chat"><div class="bubble bot"><b>FinPilot AI</b><br>Hi! I can read the numbers in your local dashboard and turn them into practical next steps. What do you want to improve?</div></div>
+<form class="chat-input" onsubmit="send(event)"><input id="msg" placeholder="Ask your finance question…" autocomplete="off"><button class="btn primary">Send ✦</button></form>
+<div class="notice">Educational use only. The assistant does not provide guaranteed returns or regulated financial advice.</div>
+</section>
+{% endblock %}
+{% block scripts %}<script>
+function addBubble(text,who){let c=document.getElementById('chat'),d=document.createElement('div');d.className='bubble '+who;d.innerHTML=who==='bot'?'<b>FinPilot AI</b><br>'+text.replace(/\n/g,'<br>'):text;c.appendChild(d);c.scrollTop=c.scrollHeight}
+function ask(x){msg.value=x;document.querySelector('.chat-input').requestSubmit()}
+async function send(e){e.preventDefault();let x=msg.value.trim();if(!x)return;msg.value='';addBubble(x,'user');addBubble('Thinking…','bot');let bubbles=document.querySelectorAll('.bubble.bot');let wait=bubbles[bubbles.length-1];let r=await api('/api/assistant','POST',{message:x});wait.innerHTML='<b>FinPilot AI</b><br>'+r.answer.replace(/\n/g,'<br>')+'<small class="source">Source: '+r.source+'</small>'}
+</script>{% endblock %}
