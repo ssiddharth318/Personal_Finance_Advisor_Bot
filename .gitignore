@@ -1,5 +1,6 @@
 __pycache__/
-.venv/
+*.pyc
+venv/
 .env
 finance.db
-*.pyc
+.DS_Store

@@ -1,0 +1,6 @@
+Demo flow:
+1. Add Income: 25000, category Other, note Monthly allowance
+2. Add Expense: 4500, Food
+3. Add Expense: 1800, Transport
+4. Add Expense: 2500, Education
+5. Dashboard updates automatically and generates a financial insight.

@@ -1,37 +1,115 @@
-{% extends "base.html" %}
-{% block title %}Financial command center{% endblock %}
-{% block content %}
-<section class="hero">
-  <div><span class="tag">SMART MONEY WORKSPACE</span><h2>Know where your money goes.<br><em>Plan where it should go.</em></h2>
-  <p>Track income and expenses, build category budgets, follow savings goals and ask an AI advisor for practical insights.</p>
-  <div class="hero-buttons"><a class="btn primary" href="/assistant">Ask AI Advisor ✦</a><a class="btn" href="/transactions">Add transaction +</a></div></div>
-  <div class="hero-art"><div class="orb"></div><div class="mini-card"><small>THIS MONTH</small><strong id="heroBalance">₹0</strong><span>available balance</span></div></div>
-</section>
-<div class="stats" id="stats"></div>
-<section class="grid-2">
- <div class="panel"><div class="panel-head"><div><h3>Cash flow</h3><p>Income vs expenses by month</p></div><span class="dot-label">● Live</span></div><canvas id="cashflow" height="150"></canvas></div>
- <div class="panel"><div class="panel-head"><div><h3>Spending mix</h3><p>Where your expenses are going</p></div></div><div class="donut-wrap"><canvas id="spending" height="210"></canvas><div id="donutLegend"></div></div></div>
-</section>
-<section class="grid-2">
- <div class="panel"><div class="panel-head"><div><h3>Budget health</h3><p>Stay ahead of category overspending</p></div><a href="/budgets">Manage →</a></div><div id="budgetList"></div></div>
- <div class="panel ai-panel"><div class="ai-glow">✦</div><div><span class="tag purple">AI INSIGHT</span><h3>Personalized money check</h3><p id="advice">Analyzing your dashboard…</p><a href="/assistant" class="text-link">Open advisor →</a></div></div>
-</section>
-{% endblock %}
-{% block scripts %}
-<script>
-async function loadDashboard(){
- const d=await api('/api/summary');
- document.getElementById('heroBalance').textContent=money(d.balance);
- const stats=document.getElementById('stats');
- stats.innerHTML=stat('Income',d.income,'↑')+stat('Expenses',d.expense,'↓')+stat('Balance',d.balance,'◈')+stat('Savings rate',d.savings_rate+'%','✦');
- const labels=d.monthly.map(x=>x.month), inc=d.monthly.map(x=>x.income), exp=d.monthly.map(x=>x.expense);
- new Chart(document.getElementById('cashflow'),{type:'line',data:{labels,datasets:[{label:'Income',data:inc,tension:.35,borderWidth:3},{label:'Expenses',data:exp,tension:.35,borderWidth:3}]},options:{plugins:{legend:{labels:{color:'#667085'}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#edf0f4'}}}}});
- const cats=d.categories; new Chart(document.getElementById('spending'),{type:'doughnut',data:{labels:cats.map(x=>x.category),datasets:[{data:cats.map(x=>x.amount),borderWidth:0}]},options:{cutout:'72%',plugins:{legend:{display:false}}}});
- document.getElementById('donutLegend').innerHTML=cats.slice(0,5).map(x=>`<div class="legend-row"><span class="legend-dot"></span><span>${x.category}</span><b>${money(x.amount)}</b></div>`).join('');
- document.getElementById('budgetList').innerHTML=d.budgets.slice(0,6).map(b=>{let p=Math.min(100,b.spent/b.limit_amount*100);return `<div class="budget-row"><div><span>${b.category}</span><b>${money(b.spent)} / ${money(b.limit_amount)}</b></div><div class="progress"><i style="width:${p}%"></i></div></div>`}).join('')||'<p class="muted">No budgets yet.</p>';
- const tips=await api('/api/assistant','POST',{message:'Give me a quick dashboard check.'}); document.getElementById('advice').innerHTML=tips.answer.replace(/\n/g,'<br>');
-}
-function stat(label,value,icon){return `<div class="stat"><span>${icon}</span><small>${label}</small><strong>${typeof value==='number'?money(value):value}</strong></div>`}
-loadDashboard();
-</script>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Finance Advisor Bot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">S</span><div><b>SKILL</b><b>WALLET</b><small>BUILD • LEARN • GROW</small></div></div>
+    <nav>
+      <a class="active">▦ <span>Dashboard</span></a>
+      <a>♜ <span>Skill Bank</span></a>
+      <a>▣ <span>Skill Wallet</span></a>
+      <a>▤ <span>Skill Card</span></a>
+      <a>♧ <span>Skill Credits</span></a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">Dashboard &nbsp;›&nbsp; SkillWallet &nbsp;›&nbsp; Project</div>
+      <div class="top-actions"><span>✦ 0 AI Token</span><span>🪙 600 Credits</span><span>🛒</span><span class="avatar">HP</span></div>
+    </header>
+
+    <section class="project-head">
+      <div>
+        <h1>Personal Finance Advisor Bot</h1>
+        <p>AI-powered personal finance assistant for smarter budgeting and saving.</p>
+      </div>
+      <div class="tabs"><button class="selected">Overview</button><button>Workspace</button><button>Kanban</button></div>
+    </section>
+
+    <div class="notice"><div>✨</div><div><b>Personal Finance Advisor Bot</b><br>Track income, manage expenses and receive personalized financial insights.</div></div>
+
+    <section class="grid">
+      <div class="content">
+        <div class="tags"><span>Finance</span><span>Individual</span></div>
+        <article class="card intro">
+          <p>The <b>Personal Finance Advisor Bot</b> is an AI-powered financial planning assistant developed to help individuals take control of their personal finances with clarity and confidence.</p>
+          <p>The system enables users to record monthly income, log daily and weekly expenses by category, receive personalized budget plans, and track saving progress within a centralized digital environment.</p>
+          <p>By integrating modern technologies with AI-driven financial analysis, the platform provides accurate budget guidance, intelligent spending insights, and structured monthly financial reporting.</p>
+          <h2>Scenarios</h2>
+          <p><b>Scenario 1:</b> A salaried professional logs monthly income and daily expenses across rent, food, transport, and entertainment. The system identifies overspending areas and generates an actionable budget plan.</p>
+          <p><b>Scenario 2:</b> A college student uses the advisor to manage a limited monthly allowance across essential and discretionary spending categories and receives recommendations for reducing unnecessary expenses.</p>
+          <p><b>Scenario 3:</b> A freelancer with variable monthly income tracks earnings from multiple clients and project-related expenses. The system adapts recommendations based on income patterns.</p>
+          <p><b>Scenario 4:</b> A household manager monitors shared family income and expenses across groceries, utilities, education, and healthcare and receives a consolidated monthly report.</p>
+        </article>
+
+        <div class="stats">
+          <div class="stat purple"><small>Monthly Income</small><strong id="income">₹0</strong></div>
+          <div class="stat green"><small>Total Expenses</small><strong id="expense">₹0</strong></div>
+          <div class="stat blue"><small>Available Balance</small><strong id="balance">₹0</strong></div>
+        </div>
+
+        <section class="card workspace">
+          <div class="section-title"><h2>Finance Workspace</h2><span id="status">● Demo mode</span></div>
+          <div class="forms">
+            <form id="txForm">
+              <div class="seg"><button type="button" class="kind active" data-kind="expense">Expense</button><button type="button" class="kind" data-kind="income">Income</button></div>
+              <input id="amount" type="number" min="1" step="0.01" placeholder="Amount (₹)" required>
+              <select id="category">
+                <option>Food</option><option>Transport</option><option>Education</option><option>Shopping</option><option>Entertainment</option><option>Rent</option><option>Utilities</option><option>Healthcare</option><option>Other</option>
+              </select>
+              <input id="note" placeholder="Note (optional)">
+              <button class="primary">Add Transaction</button>
+            </form>
+            <div class="advisor">
+              <div class="bot-icon">AI</div>
+              <div><h3 id="adviceTitle">AI Financial Insight</h3><p id="adviceText">Add your income and expenses to receive a personalized insight.</p></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-title"><h2>Recent Transactions</h2><button class="ghost" onclick="loadAll()">Refresh</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Type</th><th>Category</th><th>Amount</th><th>Note</th><th>Date</th></tr></thead><tbody id="transactions"></tbody></table></div>
+        </section>
+      </div>
+
+      <aside class="right">
+        <div class="progress-card">
+          <div class="progress-title"><b>Project Progress</b><strong>35%</strong></div>
+          <div class="bar"><i></i></div>
+          <div class="mini"><span>Complexity: Medium</span><span>Duration: 2h 0m</span></div>
+        </div>
+        <div class="card">
+          <h3>Project Workflow</h3>
+          <details open><summary>Epic 1: Model Selection and Architecture</summary><p>Define the finance workflow, database structure and AI advisor architecture.</p></details>
+          <details><summary>Epic 2: Core Functionalities Development</summary><p>Income, expenses, categories and summary APIs.</p></details>
+          <details><summary>Epic 3: App.py Development</summary><p>Flask routes and SQLite integration.</p></details>
+          <details><summary>Epic 4: Frontend Development</summary><p>Responsive dashboard and finance workspace.</p></details>
+          <details><summary>Epic 5: Deployment</summary><p>Prepare GitHub repository and deployment configuration.</p></details>
+        </div>
+        <div class="card">
+          <h3>Skills Required</h3>
+          <div class="skills"><span>Python</span><span>GeminiAI</span><span>Flask</span><span>SQLite</span><span>JavaScript</span></div>
+        </div>
+        <div class="card">
+          <h3>Technical Architecture</h3>
+          <div class="architecture">
+            <div>USER</div><div>↓</div><div>Flask API</div><div>↙ &nbsp; ↓ &nbsp; ↘</div><div>SQLite &nbsp; Advisor &nbsp; Frontend</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

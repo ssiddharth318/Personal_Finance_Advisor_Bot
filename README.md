@@ -1,57 +1,66 @@
-# FinPilot — Personal Finance Advisor Bot
+# Personal Finance Advisor Bot 💰
 
-A full-stack Flask + SQLite personal finance planning app inspired by the project brief in the supplied screenshots.
+An AI-style personal finance assistant built with **Python, Flask, SQLite and JavaScript**.
 
-## Included
-- Dashboard with income, expenses, balance and savings rate
-- Cash-flow and spending charts
-- Transaction ledger with search/filter/delete
-- Category budgets with overspending detection
-- Savings goals and progress
-- Gemini AI assistant with a no-key local fallback
-- Responsive UI
-- Demo data so the project looks populated immediately
-- SQLite local database
+## Features
+- Income and expense tracking
+- Category-wise spending analysis
+- Budget overview and savings estimate
+- AI-style personalized financial insights
+- Monthly financial summary
+- Responsive dashboard UI
+- SQLite database for persistent local data
+- Demo/fallback advisor mode that works without an external AI API
 
-## Run on Windows / VS Code
+## Tech Stack
+Python • Flask • SQLite • HTML • CSS • JavaScript
 
-1. Install Python 3.10+.
-2. Open this folder in VS Code.
-3. Open Terminal and run:
+## Run locally
 
 ```bash
-python -m venv .venv
+python -m venv venv
 ```
 
 Windows:
 ```bash
-.venv\Scripts\activate
+venv\Scripts\activate
 ```
 
 macOS/Linux:
 ```bash
-source .venv/bin/activate
+source venv/bin/activate
 ```
 
-4. Install:
+Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-5. Optional Gemini AI:
-- Copy `.env.example` to `.env`
-- Put your Gemini API key in `GEMINI_API_KEY`.
-- Or set it as an environment variable.
-
-6. Start:
+Start:
 ```bash
 python app.py
 ```
 
-7. Open:
+Open:
 `http://127.0.0.1:5000`
 
-## Notes
-The app works without a Gemini key. In that mode, the AI page uses a local rule-based financial insight engine.
+## Project Structure
 
-This is an educational budgeting tool, not a substitute for a regulated financial adviser.
+```text
+personal-finance-advisor-bot/
+├── app.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+├── templates/
+│   └── index.html
+└── static/
+    ├── style.css
+    └── app.js
+```
+
+## GitHub submission
+
+Create a new GitHub repository, upload all files, commit them, then submit the repository URL.
+
+> Note: This version includes a reliable local advisor/fallback mode. An external Gemini API can be integrated later if required by the mentor.
